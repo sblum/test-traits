@@ -1,0 +1,40 @@
+language: php
+
+env:
+  global:
+    - ENABLE_CODE_COVERAGE="false"
+    - RUN_CS_FIXER="false"
+
+git:
+  depth: false
+  submodules: false
+
+matrix:
+  fast_finish: true
+  include:
+    - php: 7.1
+    - php: 7.2
+    - php: 7.1
+      env: RUN_CS_FIXER="true"
+    - php: 7.1
+      env:
+        - ENABLE_CODE_COVERAGE="true"
+        - PHPUNIT_OPTIONS=" --coverage-text --coverage-clover build/logs/clover.xml"
+    - php: nightly
+
+
+before_install:
+  - stty cols 120
+  - if [[ "$ENABLE_CODE_COVERAGE" == "false" ]]; then phpenv config-rm xdebug.ini || echo "xdebug.ini not found"; fi;
+  - if [[ "$RUN_CS_FIXER" != "true" ]]; then composer remove friendsofphp/php-cs-fixer --dev --no-update; fi;
+  - if [[ "$ENABLE_CODE_COVERAGE" == "true" ]]; then composer require satooshi/php-coveralls:^2.0 --dev --no-update; fi;
+
+install:
+  - composer update
+
+script:
+  - vendor/bin/phpunit $PHPUNIT_OPTIONS
+  - if [[ "$RUN_CS_FIXER" == "true" ]]; then vendor/bin/php-cs-fixer --dry-run --diff -v fix; fi;
+
+after_success:
+  - if [[ "$ENABLE_CODE_COVERAGE" == "true" ]]; then vendor/bin/php-coveralls -v --config .coveralls.yml; fi;
