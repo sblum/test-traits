@@ -1,0 +1,32 @@
+{
+    "name": "sblum/test-traits",
+    "description": "collection of traits for easier testing of symfony applications.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sebastian Blum",
+            "email": "sb@sblum.de"
+        }
+    ],
+    "require": {
+        "php": ">7.1"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.10",
+        "phpunit/phpunit": "^7.0",
+        "symfony/browser-kit": "^3.4|^4.0",
+        "symfony/http-kernel": "^3.4|^4.0",
+        "symfony/framework-bundle": "^3.4|^4.0",
+        "symfony/security": "^3.4|^4.0",
+        "symfony/yaml": "^3.4|^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "sblum\\TestTraits\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": { "Tests\\sblum\\TestTraits\\": "tests/" }
+    }
+}
