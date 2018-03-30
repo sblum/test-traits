@@ -1,6 +1,6 @@
 <?php
 
-namespace sblum\TestTraits;
+namespace Sblum\TestTraits;
 
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Component\BrowserKit\Cookie;
@@ -11,27 +11,21 @@ trait AuthenticationTrait
 {
     private $firewall = 'main';
 
-    protected function setFirewall(string $firewall)
+    /**
+     * @param Client $client
+     */
+    private function assertAccessDenied(Client $client)
     {
-        $this->firewall = $firewall;
+        $this->assertTrue($client->getResponse()->isRedirect(), \sprintf('Status-Code war %s anstatt 302', $client->getResponse()->getStatusCode()));
+        $this->assertContains('/login', $client->getResponse()->headers->get('Location'));
     }
 
-    protected function logInAsAdmin(Client &$client)
-    {
-        $this->logIn($client, 'admin', ['ROLE_ADMIN']);
-    }
-
-    protected function logInAsSuperAdmin(Client &$client)
-    {
-        $this->logIn($client, 'superadmin', ['ROLE_SUPER_ADMIN']);
-    }
-
-    protected function logInAsUser(Client &$client)
-    {
-        $this->logIn($client, 'user', ['ROLE_USER']);
-    }
-
-    protected function logIn(Client &$client, string $username, array $roles)
+    /**
+     * @param Client $client
+     * @param string $username
+     * @param array $roles
+     */
+    private function logIn(Client &$client, string $username, array $roles)
     {
         /** @var Session $session */
         $session = $client->getContainer()->get('session');
@@ -44,9 +38,35 @@ trait AuthenticationTrait
         $client->getCookieJar()->set($cookie);
     }
 
-    protected function assertAccessDenied(Client $client)
+    /**
+     * @param Client $client
+     */
+    private function logInAsAdmin(Client &$client)
     {
-        $this->assertTrue($client->getResponse()->isRedirect(), \sprintf('Status-Code war %s anstatt 302', $client->getResponse()->getStatusCode()));
-        $this->assertContains('/login', $client->getResponse()->headers->get('Location'));
+        $this->logIn($client, 'admin', ['ROLE_ADMIN']);
+    }
+
+    /**
+     * @param Client $client
+     */
+    private function logInAsSuperAdmin(Client &$client)
+    {
+        $this->logIn($client, 'superadmin', ['ROLE_SUPER_ADMIN']);
+    }
+
+    /**
+     * @param Client $client
+     */
+    private function logInAsUser(Client &$client)
+    {
+        $this->logIn($client, 'user', ['ROLE_USER']);
+    }
+
+    /**
+     * @param string $firewall
+     */
+    private function setFirewall(string $firewall)
+    {
+        $this->firewall = $firewall;
     }
 }

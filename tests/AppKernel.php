@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\sblum\TestTraits;
+namespace Tests\Sblum\TestTraits;
 
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;

@@ -1,7 +1,8 @@
 <?php
 
-namespace Tests\sblum\TestTraits;
+namespace Tests\Sblum\TestTraits;
 
+use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -31,15 +32,69 @@ class AuthenticationTraitTest extends WebTestCase
             ['ROLE_ADMIN']
         );
 
-        /** @var Session $session */
-        $session = $client->getContainer()->get('session');
-        /** @var TokenInterface $token */
-        $token = \unserialize(
-            $session->get('_security_main')
-        );
-
+        $token = $this->generateToken($client);
         $this->assertInstanceOf(UsernamePasswordToken::class, $token);
         $this->assertSame('my-username', $token->getUsername());
         $this->assertEquals([new Role('ROLE_ADMIN')], $token->getRoles());
+    }
+
+    public function testLoginAsAdmin()
+    {
+        $client = static::createClient();
+
+        $implementation = new AuthenticationTraitImplementation();
+        $implementation->delegateLogInAsAdmin($client);
+
+        $token = $this->generateToken($client);
+        $this->assertInstanceOf(UsernamePasswordToken::class, $token);
+        $this->assertSame('admin', $token->getUsername());
+        $this->assertEquals([new Role('ROLE_ADMIN')], $token->getRoles());
+    }
+
+    public function testLoginAsSuperAdmin()
+    {
+        $client = static::createClient();
+
+        $implementation = new AuthenticationTraitImplementation();
+        $implementation->delegateLogInAsSuperAdmin($client);
+
+        $token = $this->generateToken($client);
+        $this->assertInstanceOf(UsernamePasswordToken::class, $token);
+        $this->assertSame('superadmin', $token->getUsername());
+        $this->assertEquals([new Role('ROLE_SUPER_ADMIN')], $token->getRoles());
+    }
+
+    public function testLoginAsUser()
+    {
+        $client = static::createClient();
+
+        $implementation = new AuthenticationTraitImplementation();
+        $implementation->delegateLogInAsAdmin($client);
+
+        $token = $this->generateToken($client);
+        $this->assertInstanceOf(UsernamePasswordToken::class, $token);
+        $this->assertSame('admin', $token->getUsername());
+        $this->assertEquals([new Role('ROLE_ADMIN')], $token->getRoles());
+    }
+
+    public function testSetFirewall()
+    {
+        $implementation = new AuthenticationTraitImplementation();
+        $implementation->delegateSetFirewall('my-firewall');
+
+        $this->assertAttributeSame('my-firewall', 'firewall', $implementation);
+    }
+
+    private function generateToken(Client $client, string $firewall = 'main'): TokenInterface
+    {
+        /** @var Session $session */
+        $session = $client->getContainer()->get('session');
+
+        /** @var TokenInterface $token */
+        $token = \unserialize(
+            $session->get(\sprintf('_security_%s', $firewall))
+        );
+
+        return $token;
     }
 }
