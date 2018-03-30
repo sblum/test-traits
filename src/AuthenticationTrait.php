@@ -1,6 +1,6 @@
 <?php
 
-namespace Sblum\TestTraits;
+namespace SBlum\TestTraits;
 
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Component\BrowserKit\Cookie;

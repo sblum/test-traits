@@ -23,10 +23,10 @@
     },
     "autoload": {
         "psr-4": {
-            "Sblum\\TestTraits\\": "src/"
+            "SBlum\\TestTraits\\": "src/"
         }
     },
     "autoload-dev": {
-        "psr-4": { "Tests\\Sblum\\TestTraits\\": "tests/" }
+        "psr-4": { "Tests\\SBlum\\TestTraits\\": "tests/" }
     }
 }

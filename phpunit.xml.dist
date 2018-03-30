@@ -10,7 +10,7 @@
     <php>
         <ini name="error_reporting" value="-1" />
         <!-- define your env variables for the test env here -->
-        <env name="KERNEL_CLASS" value="Tests\sblum\TestTraits\AppKernel" />
+        <env name="KERNEL_CLASS" value="Tests\SBlum\TestTraits\AppKernel" />
         <env name="APP_ENV" value="test" />
         <env name="APP_DEBUG" value="1" />
     </php>

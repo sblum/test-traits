@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Sblum\TestTraits;
+namespace Tests\SBlum\TestTraits;
 
-use Sblum\TestTraits\AuthenticationTrait;
+use SBlum\TestTraits\AuthenticationTrait;
 use Symfony\Bundle\FrameworkBundle\Client;
 
 class AuthenticationTraitImplementation
