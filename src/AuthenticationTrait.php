@@ -23,7 +23,7 @@ trait AuthenticationTrait
     /**
      * @param Client $client
      * @param string $username
-     * @param array $roles
+     * @param array  $roles
      */
     private function logIn(Client &$client, string $username, array $roles)
     {
