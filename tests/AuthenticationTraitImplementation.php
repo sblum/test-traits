@@ -2,7 +2,7 @@
 
 namespace Tests\Sblum\TestTraits;
 
-use sblum\TestTraits\AuthenticationTrait;
+use Sblum\TestTraits\AuthenticationTrait;
 use Symfony\Bundle\FrameworkBundle\Client;
 
 class AuthenticationTraitImplementation
