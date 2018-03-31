@@ -5,6 +5,7 @@ namespace Tests\SBlum\TestTraits;
 use SBlum\TestTraits\AuthenticationTrait;
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -26,8 +27,7 @@ class AuthenticationTraitTest extends WebTestCase
 
     public function testAssertAccessDeniedWithLogInPath(): void
     {
-        $this->setLogInPath('/my-login');
-        $redirectResponse = new RedirectResponse('/my-login');
+        $redirectResponse = new RedirectResponse('/custom-login');
 
         /** @var Client $client */
         $client = $this->createMock(Client::class);
@@ -35,6 +35,67 @@ class AuthenticationTraitTest extends WebTestCase
             ->expects($this->atLeastOnce())
             ->method('getResponse')
             ->willReturn($redirectResponse);
+
+        $this->assertAccessDenied($client, '/custom-login');
+    }
+
+    public function testAssertAccessDeniedWithGuessedLogInPath(): void
+    {
+        $redirectResponse = new RedirectResponse('/login');
+
+        /** @var Container $container */
+        $container = $this->createMock(Container::class);
+        $container
+            ->expects($this->once())
+            ->method('hasParameter')
+            ->with($this->identicalTo('security.access.denied_url'))
+            ->willReturn(true);
+        $container
+            ->expects($this->once())
+            ->method('getParameter')
+            ->with($this->identicalTo('security.access.denied_url'))
+            ->willReturn('/login');
+
+        /** @var Client $client */
+        $client = $this->createMock(Client::class);
+        $client
+            ->expects($this->atLeastOnce())
+            ->method('getResponse')
+            ->willReturn($redirectResponse);
+        $client
+            ->expects($this->atLeastOnce())
+            ->method('getContainer')
+            ->willReturn($container);
+
+        $this->assertAccessDenied($client);
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage LogInPath cannot be null if symfony/security-bundle is not installed.
+     */
+    public function testAssertAccessDeniedUrlDoesNotExist()
+    {
+        $redirectResponse = new RedirectResponse('/login');
+
+        /** @var Container $container */
+        $container = $this->createMock(Container::class);
+        $container
+            ->expects($this->once())
+            ->method('hasParameter')
+            ->with($this->identicalTo('security.access.denied_url'))
+            ->willReturn(false);
+
+        /** @var Client $client */
+        $client = $this->createMock(Client::class);
+        $client
+            ->expects($this->atLeastOnce())
+            ->method('getResponse')
+            ->willReturn($redirectResponse);
+        $client
+            ->expects($this->atLeastOnce())
+            ->method('getContainer')
+            ->willReturn($container);
 
         $this->assertAccessDenied($client);
     }
@@ -95,12 +156,6 @@ class AuthenticationTraitTest extends WebTestCase
     {
         $this->setFirewall('my-firewall');
         $this->assertAttributeSame('my-firewall', 'firewall', $this);
-    }
-
-    public function testSetLogInPath(): void
-    {
-        $this->setLogInPath('/my/login-path');
-        $this->assertAttributeSame('/my/login-path', 'logInPath', $this);
     }
 
     private function generateToken(Client $client, string $firewall = 'main'): TokenInterface

@@ -11,12 +11,12 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 trait AuthenticationTrait
 {
     private $firewall = 'main';
-    private $logInPath = null;
 
     /**
-     * @param Client $client
+     * @param Client      $client
+     * @param string|null $logInPath
      */
-    private function assertAccessDenied(Client $client): void
+    private function assertAccessDenied(Client $client, ?string $logInPath = null): void
     {
         $this->assertSame(
             Response::HTTP_FOUND,
@@ -24,8 +24,12 @@ trait AuthenticationTrait
             \sprintf('AccessDenied redirects to the login page, so status code 302 was expected. Got: "%d"', $client->getResponse()->getStatusCode())
         );
 
-        if (!empty($this->logInPath)) {
-            $logInPath = $this->logInPath;
+        if (null === $logInPath) {
+            if (!$client->getContainer()->hasParameter('security.access.denied_url')) {
+                throw new \InvalidArgumentException('LogInPath cannot be null if symfony/security-bundle is not installed.');
+            }
+
+            $logInPath = $client->getContainer()->getParameter('security.access.denied_url');
         }
 
         $this->assertTrue(
@@ -84,7 +88,7 @@ trait AuthenticationTrait
         $this->firewall = $firewall;
     }
 
-    private function setLogInPath(string $logInPath): void
+    private function setLogInPath(?string $logInPath): void
     {
         $this->logInPath = $logInPath;
     }
